@@ -25,7 +25,11 @@ COLORS = {
     'RED': (255, 0, 0),
     'GREEN': (0, 255, 0),
     'BLUE': (0, 0, 255),
-    'YELLOW': (255, 255, 0)
+    'YELLOW': (255, 255, 0),
+    'DARK_BLUE': (25, 25, 70),    # 深蓝色背景
+    'LIGHT_GRAY': (180, 180, 180), # 浅灰色网格
+    'DARK_GREEN': (20, 60, 40),    # 深绿色背景备选
+    'LIGHT_BLUE': (150, 175, 200)  # 淡蓝色网格备选
 }
 
 # 食物类型枚举
@@ -81,10 +85,16 @@ class Food:
         self.type = FoodType.NORMAL
         self.randomize_position()
 
-    def randomize_position(self):
+    def randomize_position(self, special_food_chance=0.5):
         self.position = (random.randint(0, GRID_WIDTH-1),
                         random.randint(0, GRID_HEIGHT-1))
-        self.type = random.choice(list(FoodType))
+        
+        # 根据难度决定是否生成特殊食物
+        if random.random() < special_food_chance:
+            self.type = random.choice([FoodType.SPEED_UP, FoodType.SPEED_DOWN, FoodType.WALL_PASS])
+        else:
+            self.type = FoodType.NORMAL
+            
         if self.type == FoodType.NORMAL:
             self.color = COLORS['RED']
         elif self.type == FoodType.SPEED_UP:
@@ -106,6 +116,17 @@ class Game:
         self.level = 1
         self.obstacles = []
         self.paused = False  # 添加暂停状态变量
+        
+        # 根据速度设置难度相关参数
+        if speed <= 5:  # 简单难度
+            self.obstacle_frequency = 7  # 每7个食物添加一个障碍物
+            self.special_food_chance = 0.3  # 特殊食物出现概率30%
+        elif speed <= 8:  # 中等难度
+            self.obstacle_frequency = 5  # 每5个食物添加一个障碍物
+            self.special_food_chance = 0.5  # 特殊食物出现概率50%
+        else:  # 困难难度
+            self.obstacle_frequency = 3  # 每3个食物添加一个障碍物
+            self.special_food_chance = 0.7  # 特殊食物出现概率70%
 
     def handle_keys(self):
         for event in pygame.event.get():
@@ -135,7 +156,7 @@ class Game:
         for y in range(0, WINDOW_HEIGHT, GRID_SIZE):
             for x in range(0, WINDOW_WIDTH, GRID_SIZE):
                 r = pygame.Rect(x, y, GRID_SIZE, GRID_SIZE)
-                pygame.draw.rect(self.screen, COLORS['WHITE'], r, 1)
+                pygame.draw.rect(self.screen, COLORS['LIGHT_GRAY'], r, 1)
                 
     def update(self):
         key_action = self.handle_keys()
@@ -163,21 +184,22 @@ class Game:
                 self.snake.speed = max(5, self.snake.speed - 2)
             elif self.food.type == FoodType.WALL_PASS:
                 self.snake.wall_pass = True
-            self.food.randomize_position()
+            self.food.randomize_position(self.special_food_chance)
             self.snake.growth_points += 1
 
             # 升级检查
             if self.snake.growth_points >= 5:
                 self.level += 1
                 self.snake.growth_points = 0
-                # 添加新的障碍物
-                self.obstacles.append((random.randint(0, GRID_WIDTH-1),
-                                     random.randint(0, GRID_HEIGHT-1)))
+                # 根据难度添加新的障碍物
+                if self.level % self.obstacle_frequency == 0:
+                    self.obstacles.append((random.randint(0, GRID_WIDTH-1),
+                                         random.randint(0, GRID_HEIGHT-1)))
         
         return False  # 游戏继续
 
     def draw(self, screen):
-        screen.fill(COLORS['BLACK'])
+        screen.fill(COLORS['DARK_BLUE'])
         self.draw_grid()
 
         # 绘制障碍物
@@ -232,3 +254,4 @@ class Game:
 if __name__ == '__main__':
     game = Game()
     game.run()
+    
