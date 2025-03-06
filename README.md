@@ -1,6 +1,6 @@
 # 贪食蛇游戏
 
-一个具有丰富特色功能的现代贪食蛇游戏，包含多种食物类型、障碍物系统、关卡进度、皮肤系统和成就系统等特性。
+一个具有丰富特色功能的现代贪食蛇游戏，包含多种食物类型、障碍物系统、关卡进度、难度系统、皮肤系统和成就系统等特性。
 
 ## 游戏特色
 
@@ -41,7 +41,8 @@ python main.py
 
 ## 游戏截图
 
-![image](https://github.com/user-attachments/assets/4b412ee7-e9e9-4e13-a90a-cd38f0940b3d)
+![image](https://github.com/user-attachments/assets/b0781866-c958-4b2e-b39d-d2ac0d71acc4)
+
 
 ## 开发环境
 
