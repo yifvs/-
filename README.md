@@ -41,7 +41,7 @@ python main.py
 
 ## 游戏截图
 
-[此处将添加游戏实际截图]
+[![image](https://github.com/user-attachments/assets/4b412ee7-e9e9-4e13-a90a-cd38f0940b3d)]
 
 ## 开发环境
 
