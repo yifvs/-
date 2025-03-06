@@ -10,7 +10,7 @@ class MenuState(Enum):
     SETTINGS = 1
     SKINS = 2
     ACHIEVEMENTS = 3
-    SPEED = 4
+    DIFFICULTY = 4
 
 # 按钮类
 class Button:
@@ -69,7 +69,7 @@ class Menu:
             Button(self.screen_width//2 - button_width//2, start_y, 
                    button_width, button_height, "开始游戏", (0, 100, 0), (0, 150, 0)),
             Button(self.screen_width//2 - button_width//2, start_y + button_height + button_spacing, 
-                   button_width, button_height, "速度选择", (100, 100, 0), (150, 150, 0)),
+                   button_width, button_height, "难度选择", (100, 100, 0), (150, 150, 0)),
             Button(self.screen_width//2 - button_width//2, start_y + 2 * (button_height + button_spacing), 
                    button_width, button_height, "皮肤选择", (0, 0, 100), (0, 0, 150)),
             Button(self.screen_width//2 - button_width//2, start_y + 3 * (button_height + button_spacing), 
@@ -78,16 +78,16 @@ class Menu:
                    button_width, button_height, "退出", (100, 0, 0), (150, 0, 0))
         ]
         
-        # 速度选择按钮
-        self.speed_buttons = []
-        speeds = [("慢速", 3), ("中速", 5), ("快速", 7), ("极速", 10)]
-        for i, (speed_name, speed_value) in enumerate(speeds):
-            x = self.screen_width//4 + (i % 2) * (button_width + button_spacing)
-            y = start_y + (i // 2) * (button_height + button_spacing)
-            self.speed_buttons.append({
-                "button": Button(x, y, button_width//2, button_height, speed_name, (0, 100, 100), (0, 150, 150)),
+        # 难度选择按钮
+        self.difficulty_buttons = []
+        difficulties = [("简单", 5), ("中等", 8), ("困难", 12)]
+        for i, (diff_name, speed_value) in enumerate(difficulties):
+            x = self.screen_width//2 - button_width//2 + (i - 1) * (button_width + button_spacing)
+            y = start_y + (i // 3) * (button_height + button_spacing)
+            self.difficulty_buttons.append({
+                "button": Button(x, y, button_width, button_height, diff_name, (0, 100, 100), (0, 150, 150)),
                 "value": speed_value,
-                "name": speed_name
+                "name": diff_name
             })
         
         # 皮肤选择按钮
@@ -220,19 +220,30 @@ class Menu:
             # 绘制返回按钮
             self.back_button.draw(screen)
             
-        elif self.state == MenuState.SPEED:
+        elif self.state == MenuState.DIFFICULTY:
             # 绘制标题
-            title = self.title_font.render("速度选择", True, (255, 255, 255))
+            title = self.title_font.render("难度选择", True, (255, 255, 255))
             screen.blit(title, (self.screen_width//2 - title.get_width()//2, 100))
             
-            # 绘制速度按钮
-            for speed in self.speed_buttons:
-                speed["button"].draw(screen)
-                if speed["value"] == self.selected_speed:
-                    pygame.draw.rect(screen, (255, 255, 255), speed["button"].rect, 3, border_radius=10)
+            # 绘制难度说明
+            descriptions = [
+                "简单：速度较慢，适合新手",
+                "中等：速度适中，挑战性增加",
+                "困难：速度较快，考验反应能力"
+            ]
+            for i, desc in enumerate(descriptions):
+                desc_text = self.subtitle_font.render(desc, True, (200, 200, 200))
+                screen.blit(desc_text, (self.screen_width//2 - desc_text.get_width()//2, 180 + i*40))
             
-            # 显示当前选择的速度
-            current_text = self.subtitle_font.render(f"当前速度: {self.selected_speed}", True, (255, 255, 255))
+            # 绘制难度按钮
+            for diff in self.difficulty_buttons:
+                diff["button"].draw(screen)
+                if diff["value"] == self.selected_speed:
+                    pygame.draw.rect(screen, (255, 255, 255), diff["button"].rect, 3, border_radius=10)
+            
+            # 显示当前选择的难度
+            current_diff = "简单" if self.selected_speed == 5 else "中等" if self.selected_speed == 8 else "困难"
+            current_text = self.subtitle_font.render(f"当前难度: {current_diff}", True, (255, 255, 255))
             screen.blit(current_text, (self.screen_width//2 - current_text.get_width()//2, self.screen_height - 150))
             
             # 绘制返回按钮
@@ -257,15 +268,16 @@ class Menu:
                 name_text = self.subtitle_font.render(achievement["name"], True, color)
                 desc_text = self.subtitle_font.render(achievement["desc"], True, color)
                 
-                screen.blit(name_text, (self.screen_width//2 - 150, y_pos))
-                screen.blit(desc_text, (self.screen_width//2 + 50, y_pos))
+                # 调整文本位置和间距
+                screen.blit(name_text, (self.screen_width//2 - 200, y_pos))
+                screen.blit(desc_text, (self.screen_width//2 + 20, y_pos))
                 
                 # 显示解锁状态
                 status = "✓" if achievement["unlocked"] else "✗"
                 status_text = self.subtitle_font.render(status, True, color)
                 screen.blit(status_text, (self.screen_width//2 + 200, y_pos))
                 
-                y_pos += 50
+                y_pos += 80  # 增加垂直间距
             
             # 绘制返回按钮
             self.back_button.draw(screen)
@@ -289,8 +301,8 @@ class Menu:
                 if button.is_clicked(mouse_pos, mouse_clicked):
                     if i == 0:  # 开始游戏
                         return "start_game"
-                    elif i == 1:  # 速度选择
-                        self.state = MenuState.SPEED
+                    elif i == 1:  # 难度选择
+                        self.state = MenuState.DIFFICULTY
                     elif i == 2:  # 皮肤选择
                         self.state = MenuState.SKINS
                     elif i == 3:  # 成就
@@ -318,12 +330,12 @@ class Menu:
             if self.back_button.is_clicked(mouse_pos, mouse_clicked):
                 self.state = MenuState.MAIN
                 
-        elif self.state == MenuState.SPEED:
-            # 处理速度选择
-            for speed in self.speed_buttons:
-                speed["button"].check_hover(mouse_pos)
-                if speed["button"].is_clicked(mouse_pos, mouse_clicked):
-                    self.selected_speed = speed["value"]
+        elif self.state == MenuState.DIFFICULTY:
+            # 处理难度选择
+            for diff in self.difficulty_buttons:
+                diff["button"].check_hover(mouse_pos)
+                if diff["button"].is_clicked(mouse_pos, mouse_clicked):
+                    self.selected_speed = diff["value"]
                     self.state = MenuState.MAIN
             
             # 处理返回按钮
